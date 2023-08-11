@@ -29,9 +29,6 @@ def isValid(board):
             if (board[r][c] in rows[r] or
                 board[r][c] in cols[c] or
                 board[r][c] in squares[r // 3, c // 3]):
-                print(f"r: {r}")
-                print(f"c: {c}")
-                print(f"board[r][c]: {board[r][c]}")
                 return False
             
             cols[c].add(board[r][c])
@@ -40,12 +37,52 @@ def isValid(board):
     
     return True
 
-def solveBoard(board):
-    '''Solves current valid board using backtracking.
-    rtype: bool
-    '''
+def solveSudoku(board):
+    if isComplete(board):
+        return board  # Puzzle is solved
     
-    return -1
+    row, col = findNextEmptyCell(board)
+    
+    for num in range(1,10):
+        if isValidMove(board, row, col, num):
+            board[row][col] = num
+            
+            if solveSudoku(board) is not None:
+                return board  # Successfully solved
+            
+            board[row][col] = 0  # Backtrack
+        
+    return None  # No solution found
+
+def isComplete(board):
+    for row in board:
+        for cell in row:
+            if cell == 0:
+                return False
+    return True
+
+def findNextEmptyCell(board):
+    for row in range(9):
+        for col in range(9):
+            if board[row][col] == 0:
+                return row, col
+    return -1, -1  # No empty cell found
+
+def isValidMove(board, row, col, num):
+    # Check row and column
+    for i in range(9):
+        if board[row][i] == num or board[i][col] == num:
+            return False
+    
+    # Check 3x3 subgrid
+    startRow, startCol = row - row % 3, col - col % 3
+    for i in range(3):
+        for j in range(3):
+            if board[startRow + i][startCol + j] == num:
+                return False
+    
+    return True
+    
 
 def main():
     if len(sys.argv) >= 3 or len(sys.argv) <= 1:
@@ -59,7 +96,9 @@ def main():
         print("Board is not valid")
         return -1
     
-    return solveBoard(board)    
-
+    solvedBoard = solveSudoku(board)
+    for row in solvedBoard:
+        print(row)
+        
 if __name__ == "__main__":
     main()
