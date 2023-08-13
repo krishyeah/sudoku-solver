@@ -2,6 +2,10 @@ import sys
 import collections
 import csv
 
+cols = collections.defaultdict(set)
+rows = collections.defaultdict(set)
+squares = collections.defaultdict(set)
+
 def readgridfile(fileName):
     '''Read grid from grid.txt and output as list[list[int]]
     rtype: list[list[int]]
@@ -16,10 +20,6 @@ def isValid(board):
     '''
     if len(board) != 9 and len(board[0]) != 9:
         return False
-    
-    cols = collections.defaultdict(set)
-    rows = collections.defaultdict(set)
-    squares = collections.defaultdict(set)
 
     for r in range(9):
         for c in range(9):
@@ -28,12 +28,12 @@ def isValid(board):
             
             if (board[r][c] in rows[r] or
                 board[r][c] in cols[c] or
-                board[r][c] in squares[r // 3, c // 3]):
+                board[r][c] in squares[3 * (r // 3) + c // 3]):
                 return False
             
             cols[c].add(board[r][c])
             rows[r].add(board[r][c])
-            squares[(r // 3, c // 3)].add(board[r][c])
+            squares[3 * (r // 3) + c // 3].add(board[r][c])
     
     return True
 
@@ -46,11 +46,17 @@ def solveSudoku(board):
     for num in range(1,10):
         if isValidMove(board, row, col, num):
             board[row][col] = num
+            cols[col].add(num)
+            rows[row].add(num)
+            squares[3 * (row // 3) + col // 3].add(num)
             
             if solveSudoku(board) is not None:
                 return board  # Successfully solved
             
             board[row][col] = 0  # Backtrack
+            cols[col].remove(num)
+            rows[row].remove(num)
+            squares[3 * (row // 3) + col // 3].remove(num)
         
     return None  # No solution found
 
@@ -69,21 +75,11 @@ def findNextEmptyCell(board):
     return -1, -1  # No empty cell found
 
 def isValidMove(board, row, col, num):
-    # Check row and column
-    for i in range(9):
-        if board[row][i] == num or board[i][col] == num:
-            return False
-    
-    # Check 3x3 subgrid
-    startRow, startCol = row - row % 3, col - col % 3
-    for i in range(3):
-        for j in range(3):
-            if board[startRow + i][startCol + j] == num:
-                return False
+    if num in cols[col] or num in rows[row] or num in squares[3 * (row // 3) + col // 3]:
+        return False
     
     return True
     
-
 def main():
     if len(sys.argv) >= 3 or len(sys.argv) <= 1:
         print("Usage: sudokusolver.py filepath")
