@@ -1,0 +1,79 @@
+body {
+    font-family: 'Lucida Console', monospace;
+    background-color: #0a0a23;
+    margin: 0px;
+    padding: 20px;
+    color: #ffffff;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #ffffff;
+}
+
+.sudoku-board {
+    display: grid;
+    grid-template-columns: repeat(9, 40px);
+    gap: 0;
+    justify-content: center;
+    border: 5px solid #2a2a40;
+    width: max-content;
+    margin: 40px auto;
+}
+
+.sudoku-board input {
+    border: 1px solid #3b3b4f;
+    font: bold 20px 'Lucida Console', monospace;
+    width: 40px;
+    height: 40px;
+    font-size: 24px;
+    text-align: center;
+    color: black;
+    background-color: #f2f2f2;
+    box-sizing: border-box;
+}
+
+/* Thick left border for first, col 4, col 7 */
+.sudoku-board input:nth-of-type(9n+1),
+.sudoku-board input:nth-of-type(9n+4),
+.sudoku-board input:nth-of-type(9n+7) {
+    border-left-width: 3px;
+}
+
+/* Thick top border for row 1, 4, 7 */
+.sudoku-board input:nth-of-type(-n+9),              /* row 1 */
+.sudoku-board input:nth-of-type(n+28):nth-of-type(-n+36), /* row 4 */
+.sudoku-board input:nth-of-type(n+55):nth-of-type(-n+63)  /* row 7 */ {
+    border-top-width: 3px;
+}
+
+/* Thick right border at end of each row */
+.sudoku-board input:nth-of-type(9n) {
+    border-right-width: 3px;
+}
+
+/* Thick bottom border at last row */
+.sudoku-board input:nth-of-type(n+73) {
+    border-bottom-width: 3px;
+}
+
+
+button {
+    display: block;
+    background-color: #f5f6f7;
+    font-size: 16px;
+    border-radius: 4px;
+    padding: 10px 20px;
+    color: #0a0a23;
+    margin: 0 auto;
+    margin-top: 20px;
+    cursor: pointer;
+    border: none;
+    transition: background-color 0.2s ease;
+}
+
+button:hover {
+    background-color: #3b3b4f;
+    color: #d0d0d5;
+}

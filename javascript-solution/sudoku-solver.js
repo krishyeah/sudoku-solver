@@ -2,6 +2,15 @@ let cols = Array.from({ length: 9 }, () => new Set());
 let rows = Array.from({ length: 9 }, () => new Set());
 let squares = Array.from({ length: 9 }, () => new Set());
 
+const sudoku_board = document.querySelector(".sudoku-board");
+
+for (let i = 0; i < 81; i++) {
+    const input = document.createElement("input");
+    input.type = "text";
+    input.maxLength = 1;
+    sudoku_board.appendChild(input);
+}
+
 function resetSets() {
     cols = Array.from({ length: 9 }, () => new Set());
     rows = Array.from({ length: 9 }, () => new Set());
