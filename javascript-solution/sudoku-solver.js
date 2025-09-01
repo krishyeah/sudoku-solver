@@ -2,14 +2,24 @@ let cols = Array.from({ length: 9 }, () => new Set());
 let rows = Array.from({ length: 9 }, () => new Set());
 let squares = Array.from({ length: 9 }, () => new Set());
 
-const sudoku_board = document.querySelector(".sudoku-board");
+const sudoku_board = document.querySelector('.sudoku-board');
 
 for (let i = 0; i < 81; i++) {
-    const input = document.createElement("input");
-    input.type = "text";
+    const input = document.createElement('input');
+    input.type = 'text';
     input.maxLength = 1;
     sudoku_board.appendChild(input);
 }
+
+const cells = document.querySelectorAll('.sudoku-board input');
+cells.forEach(cell => {
+    cell.addEventListener('input', (e) => {
+        const value = e.target.value;
+        if (!/^[1-9]$/.test(value)) {
+            e.target.value = '';
+        }
+    });
+});
 
 function resetSets() {
     cols = Array.from({ length: 9 }, () => new Set());
@@ -21,16 +31,16 @@ function isValid(board) {
     if (board.length !== 9 || board[0].length !== 9) {
         return false;
     }
-    
+
     resetSets();
-    
+
     for (let r = 0; r < 9; r++) {
         for (let c = 0; c < 9; c++) {
             if (board[r][c] === 0) continue;
-            
+
             if (
-                rows[r].has(board[r][c]) || 
-                cols[c].has(board[r][c]) || 
+                rows[r].has(board[r][c]) ||
+                cols[c].has(board[r][c]) ||
                 squares[3 * Math.floor(r / 3) + Math.floor(c / 3)].has(board[r][c])
             ) {
                 return false;
@@ -41,7 +51,7 @@ function isValid(board) {
             squares[3 * Math.floor(r / 3) + Math.floor(c / 3)].add(board[r][c]);
         }
     }
-    
+
     return true;
 }
 
@@ -69,31 +79,73 @@ function isValidMove(board, row, col, num) {
     )
 }
 
-function solveSudoku(board) {
-  if (isComplete(board)) {
-    return board;
-  }
+function showPopup(message) {
+    const popup = document.getElementById('popup');
+    const popupMessage = document.getElementById('popup-message');
+    popupMessage.textContent = message;
+    popup.style.display = 'block';
+}
 
-  const [row, col] = findNextEmptyCell(board);
+document.getElementById('popup-close').addEventListener('click', () => {
+    const popup = document.getElementById('popup');
+    popup.style.display = 'none';
+});
 
-  for (let num = 1; num <= 9; num++) {
-    if (isValidMove(board, row, col, num)) {
-      board[row][col] = num;
-      rows[row].add(num);
-      cols[col].add(num);
-      squares[3 * Math.floor(row / 3) + Math.floor(col / 3)].add(num);
+function solveSudoku() {
+    const board = [];
+    const cells = sudoku_board.querySelectorAll('input');
 
-      if (solveSudoku(board)) {
-        return board;
-      }
+    for (let row = 0; row < 9; row++) {
+        const currentRow = [];
+        for (let col = 0; col < 9; col++) {
+            const idx = row * 9 + col;
+            const rawValue = cells[idx].value.trim();
+            let value;
 
-      // Backtrack
-      board[row][col] = 0;
-      rows[row].delete(num);
-      cols[col].delete(num);
-      squares[3 * Math.floor(row / 3) + Math.floor(col / 3)].delete(num);
+            if (rawValue === '') {
+                value = 0;
+            } else {
+                value = parseInt(rawValue);
+                if (isNaN(value) || value < 1 || value > 9) {
+                    alert('Invalid value at row ${row + 1}, column ${col + 1}. Please enter a number between 1 and 9.');
+                    return;
+                }
+            }
+
+            currentRow.push(value);
+        }
+        board.push(currentRow);
     }
-  }
 
-  return null;
+    if (!isValid(board)) {
+        showPopup('Board is not valid. Please enter a valid Sudoku board.');
+        return;
+    }
+    
+    if (isComplete(board)) {
+        return board;
+    }
+
+    const [row, col] = findNextEmptyCell(board);
+
+    for (let num = 1; num <= 9; num++) {
+        if (isValidMove(board, row, col, num)) {
+            board[row][col] = num;
+            rows[row].add(num);
+            cols[col].add(num);
+            squares[3 * Math.floor(row / 3) + Math.floor(col / 3)].add(num);
+
+            if (solveSudoku(board)) {
+                return board;
+            }
+
+            // Backtrack
+            board[row][col] = 0;
+            rows[row].delete(num);
+            cols[col].delete(num);
+            squares[3 * Math.floor(row / 3) + Math.floor(col / 3)].delete(num);
+        }
+    }
+
+    return null;
 }
