@@ -107,8 +107,10 @@ function solveSudoku() {
             } else {
                 value = parseInt(rawValue);
                 if (isNaN(value) || value < 1 || value > 9) {
-                    alert('Invalid value at row ${row + 1}, column ${col + 1}. Please enter a number between 1 and 9.');
-                    return;
+                    showPopup(
+                        'Invalid value at row ${row + 1}, column ${col + 1}. Please enter a number from 1 to 9.'
+                    );
+                    return null;
                 }
             }
 
@@ -119,11 +121,15 @@ function solveSudoku() {
 
     if (!isValid(board)) {
         showPopup('Board is not valid. Please enter a valid Sudoku board.');
-        return;
+        return null;
     }
-    
+
+    return backtrack(board) ? board : null;
+}
+
+function backtrack(board) {
     if (isComplete(board)) {
-        return board;
+        return true;
     }
 
     const [row, col] = findNextEmptyCell(board);
@@ -135,7 +141,7 @@ function solveSudoku() {
             cols[col].add(num);
             squares[3 * Math.floor(row / 3) + Math.floor(col / 3)].add(num);
 
-            if (solveSudoku(board)) {
+            if (backtrack(board)) {
                 return board;
             }
 
@@ -147,5 +153,34 @@ function solveSudoku() {
         }
     }
 
-    return null;
+    return false;
+}
+
+function solve() {
+    const solution = solveSudoku();
+    
+    const parent = document.getElementById('sudoku-container');
+    
+    // clean up any previous solutions
+    const oldSolution = document.getElementById('solved-grid');
+    if (oldSolution) {
+        oldSolution.remove();
+    }
+
+    // create new solution grid
+    const gridDiv = document.createElement('div');
+    gridDiv.className = 'sudoku-board';
+    gridDiv.id = 'solved-grid';
+
+    if (solution) {
+        for (let i = 0; i < 81; i++) {
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.maxLength = 1;
+            input.value = solution[Math.floor(i / 9)][i % 9];
+            input.disabled = true;
+            gridDiv.appendChild(input);
+        }
+        parent.appendChild(gridDiv);
+    }
 }
